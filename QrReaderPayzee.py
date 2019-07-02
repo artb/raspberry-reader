@@ -19,13 +19,9 @@ def runcommand (cmd):
     std_out, std_err = proc.communicate()
     return proc.returncode, std_out, std_err
 
-# host_url = 'http://ec2-54-209-181-18.compute-1.amazonaws.com'
-# host_url = 'http://192.168.0.22'
-host_url = 'http://192.168.43.86:3333'
-establishmentId = '5d1af4894f62310027c964f7'
+reciver = '5d1af4894f62310027c964f7'
+url = 'http://192.168.43.86:3333/transactions/transaction/'
 
-# req = requests.get(host_url + '/users')
-# print('Users: ' + req.text)
 
 #imports raspberry hardware
 pinoVerde = 18
@@ -70,7 +66,7 @@ def apago():
 def acendo():
 	GPIO.output(pinoVermelho,GPIO.HIGH) #acendo vermelho
 
-# construct the argument parser and parse the arguments - infelizmente precisa disso
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-o", "--output", type=str, default="barcodes.csv",
 	help="path to output CSV file containing barcodes")
@@ -80,16 +76,11 @@ args = vars(ap.parse_args())
 print("[RASPBERRY] starting video stream...")
 vs = VideoStream(usePiCamera=True).start()
 time.sleep(2.0)
-
-# open the output CSV file for writing and initialize the set of
-# barcodes found thus far
 csv = open(args["output"], "w")
 found = set()
 GPIO.output(pinoVermelho,GPIO.HIGH)
 # loop over the frames from the video stream
 while True:
-	# grab the frame from the threaded video stream and resize it to
-	# have a maximum width of 400 pixels
 	frame = vs.read()
 	frame = imutils.resize(frame, width=400)
 
@@ -97,36 +88,24 @@ while True:
 	barcodes = pyzbar.decode(frame)
 		# loop over the detected barcodes
 	for barcode in barcodes:
-		# the barcode data is a bytes object so if we want to draw it
-		# on our output image we need to convert it to a string first
 		barcodeData = barcode.data.decode("utf-8")
 		barcodeType = barcode.type
 		print(barcodeData)
-		#aqui to fazendo uma gamb pra apresentacao de SD mas aqui eh pra fazer qrCodeLido != barcodeData
 		if(qrCodeLido != barcodeData):
 			qrCodeLido = barcodeData.replace('http://', '')
-			print('Fazendo o post para ' + host_url + '/transactions/transaction/' + qrCodeLido + '/' + establishmentId)
+			url = url + qrCodeLido + '/' + reciver
+			print('Fazendo o post para ' + url)
 			apago()
-			#req = requests.post(host_url + '/transactions/transaction', params={'providerId': qrCodeLido, 'recipientId': establishmentId}, data={'type': 'checkout'})
-			#req = requests.get(host_url + '/transactions/transaction/' + qrCodeLido + '/' + establishmentId, data={'type': 'checkout'})
-			#returncode, std_out, std_err = runcommand('node request.js '+ qrCodeLido)
-			print('pera la ', qrCodeLido)
-			respo = requests.post(url = host_url + '/transactions/transaction/' + qrCodeLido + '/' + establishmentId, data={'type': 'checkout'})
-
+			returncode = requests.post(url,json={'type':'checkout'})
 			acendo()
-			#aqui eu vou mandar a requisicao pra API
-			#print(req.url)
-			#print(req.text)
 			print(returncode)
-			if(returncode == 0):
+			if(returncode == 'Response [201]'):
 				piscaSucesso()
 				print('Sucesso!')
 			else:
 				piscaFracasso()
 				print('Fracasso!')
 
-		# if the barcode text is currently not in our CSV file, write
-		# the timestamp + barcode to disk and update the set
 		if barcodeData not in found:
 			csv.write("{},{}\n".format(datetime.datetime.now(),
 				barcodeData))
