@@ -109,11 +109,15 @@ while True:
 			apago()
 			#req = requests.post(host_url + '/transactions/transaction', params={'providerId': qrCodeLido, 'recipientId': establishmentId}, data={'type': 'checkout'})
 			#req = requests.get(host_url + '/transactions/transaction/' + qrCodeLido + '/' + establishmentId, data={'type': 'checkout'})
-			returncode, std_out, std_err = runcommand('node request.js '+ qrCodeLido)
+			#returncode, std_out, std_err = runcommand('node request.js '+ qrCodeLido)
+			print('pera la ', qrCodeLido)
+			respo = requests.post(url = host_url + '/transactions/transaction/' + qrCodeLido + '/' + establishmentId, data={'type': 'checkout'})
+
 			acendo()
 			#aqui eu vou mandar a requisicao pra API
 			#print(req.url)
 			#print(req.text)
+			print(returncode)
 			if(returncode == 0):
 				piscaSucesso()
 				print('Sucesso!')
