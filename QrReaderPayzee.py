@@ -76,6 +76,7 @@ args = vars(ap.parse_args())
 print("[RASPBERRY] starting video stream...")
 vs = VideoStream(usePiCamera=True).start()
 time.sleep(2.0)
+print("[RASPBERRY READY]")
 csv = open(args["output"], "w")
 found = set()
 GPIO.output(pinoVermelho,GPIO.HIGH)
@@ -98,8 +99,8 @@ while True:
 			apago()
 			returncode = requests.post(url,json={'type':'checkout'})
 			acendo()
-			print(returncode)
-			if(returncode == 'Response [201]'):
+			print(returncode.status_code)
+			if(returncode.status_code == 201):
 				piscaSucesso()
 				print('Sucesso!')
 			else:
