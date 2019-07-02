@@ -1,0 +1,7 @@
+Para iniciar o servico:
+source ~/.profile
+workon cv
+python QrReaderpayzee.py
+
+Para encerrar o servico:
+apertar q no terminal
